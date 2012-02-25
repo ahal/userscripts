@@ -2,7 +2,13 @@
 // @name           Reddit History
 // @namespace      tag:halbersa@gmail.com,2012-02-24:ahal
 // @description    Keeps track of all the submissions you viewed on Reddit
-// @include        http://www.reddit.com/*
+// @include        https://www.reddit.com*
+// @include        http://www.reddit.com*
+// @exclude        http://www.reddit.com/user/*
+// @exclude        http://www.reddit.com/*/comments/*
+// @exclude        http://www.reddit.com/submit
+// @exclude        http://www.reddit.com/reddits/create
+// @exclude        http://www.reddit.com/account-activity
 // ==/UserScript==
 
 var header = document.getElementById('header'); 
