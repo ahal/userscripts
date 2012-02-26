@@ -23,17 +23,17 @@ add_click_listeners();
  * Appends a history tab to the navbar
  */
 function append_history_tab() {
-  let tabMenu = header.querySelectorAll('ul.tabmenu')[0];
-  let listItem = document.createElement('li'); 
-  let link = document.createElement('a');
+  var tabMenu = header.querySelectorAll('ul.tabmenu')[0];
+  var listItem = document.createElement('li'); 
+  var link = document.createElement('a');
 
   /**
    * Displays the history tab
    */
-  let click_history = function (){
-    let items = tabMenu.getElementsByTagName('li');
+  var click_history = function (){
+    var items = tabMenu.getElementsByTagName('li');
 
-    let reload = function(){
+    var reload = function(){
       location.reload();
     }
 
@@ -47,9 +47,9 @@ function append_history_tab() {
 
     // Build the chrome controls
     content.innerHTML = "";
-    let h_controls = document.createElement('div');
+    var h_controls = document.createElement('div');
     h_controls.className = 'spacer historyControls';
-    let s="<input id='rhRegex' value=''/>";
+    var s="<input id='rhRegex' value=''/>";
     s+="<button id='rhFilter'>Filter (regex)</button>";
     s+="<button id='rhClear'>Clear All History</button>";
     s+="<div style='text-align: right; width: 50%; float: right;'>";
@@ -58,19 +58,19 @@ function append_history_tab() {
     h_controls.innerHTML = s;
     content.appendChild(h_controls);
 
-    let h_items = document.createElement('div');
+    var h_items = document.createElement('div');
     h_items.className = 'spacer historyItems';
     content.appendChild(h_items);
 
     // Add button listeners
-    let h_filter = document.getElementById('rhFilter');
-    let h_clear = document.getElementById('rhClear');
-    let h_save = document.getElementById('rhSave');
+    var h_filter = document.getElementById('rhFilter');
+    var h_clear = document.getElementById('rhClear');
+    var h_save = document.getElementById('rhSave');
     h_filter.addEventListener('click', filter);
     h_clear.addEventListener('click', clear);
     h_save.addEventListener('click', save_limit);
 
-    let h_limit = document.getElementById('rhLimit');
+    var h_limit = document.getElementById('rhLimit');
     h_limit.value = GM_getValue('limit', 10000);
 
     show_history();
@@ -87,55 +87,57 @@ function append_history_tab() {
  * Adds a listener to each submission
  */
 function add_click_listeners() {
-  let siteTable = document.getElementById('siteTable');
-  let submissions = siteTable.querySelectorAll('div.entry');
-  for (let i = 0; i < submissions.length; ++i) {
-    let s = submissions[i];
-    let link = s.querySelectorAll('a.title')[0];
-    let comment = s.querySelectorAll('a.comments')[0];
-
-    /**
-     * Adds the submission to history
-     */
-    let add_submission = function() {
-      let domain = s.querySelectorAll('span.domain')[0].getElementsByTagName('a')[0];
-      let sub = s.querySelectorAll('p.tagline')[0].querySelectorAll('a.subreddit')[0];
-      if (sub == undefined) {
-        sub = header.querySelectorAll('span.redditname')[0].getElementsByTagName('a')[0];
-      }
-      history.add_submission(link.innerHTML,
-                             link.href,
-                             comment.href,
-                             sub.innerHTML,
-                             sub.href,
-                             domain.innerHTML,
-                             domain.href);
-    }
-    
-    link.addEventListener('click', add_submission);
-    comment.addEventListener('click', add_submission);
+  var siteTable = document.getElementById('siteTable');
+  var submissions = siteTable.querySelectorAll('div.entry');
+  for (var i = 0; i < submissions.length; ++i) {
+    add_handlers(submissions[i]); // needed to scope
   }
+}
+
+function add_handlers(s) {
+  var link = s.querySelectorAll('a.title')[0];
+  var comment = s.querySelectorAll('a.comments')[0];
+
+  /**
+   * Adds the submission to history
+   */
+  var add_submission = function() {
+    var domain = s.querySelectorAll('span.domain')[0].getElementsByTagName('a')[0];
+    var sub = s.querySelectorAll('p.tagline')[0].querySelectorAll('a.subreddit')[0];
+    if (sub == undefined) {
+      sub = header.querySelectorAll('span.redditname')[0].getElementsByTagName('a')[0];
+    }
+    history.add_submission(link.innerHTML,
+                           link.href,
+                           comment.href,
+                           sub.innerHTML,
+                           sub.href,
+                           domain.innerHTML,
+                           domain.href);
+  }
+  link.addEventListener('click', add_submission);
+  comment.addEventListener('click', add_submission);
 }
 
 /**
  * Displays the history in the history tab
  */
 function show_history(regex) {
-  let h_controls = content.querySelectorAll('div.historyControls')[0];
-  let h_items = content.querySelectorAll('div.historyItems')[0];
-  let re = null;
+  var h_controls = content.querySelectorAll('div.historyControls')[0];
+  var h_items = content.querySelectorAll('div.historyItems')[0];
+  var re = null;
   if (regex != undefined) {
     re = new RegExp(regex);
-    let filter = document.getElementById('rhRegex');
+    var filter = document.getElementById('rhRegex');
     filter.value = regex;
   }
-  let items = history.get_history(re);
+  var items = history.get_history(re);
 
-  for (let i = 0; i < items.length; ++i) {
-    let mod = (i % 2 == 0 ? 'even' : 'odd');
-    let div = document.createElement('div');
+  for (var i = 0; i < items.length; ++i) {
+    var mod = (i % 2 == 0 ? 'even' : 'odd');
+    var div = document.createElement('div');
     div.className = "thing link " + mod;
-    let s = "<span class='rank' style='width:3.30ex;'>" + (i+1) + "</span>";
+    var s = "<span class='rank' style='width:3.30ex;'>" + (i+1) + "</span>";
     s += "<div class='midcol' style='width:5ex;'><div class='arrow up'></div><div class='score unvoted'>•</div><div class='arrow down'></div></div>";
     s += "<div class='entry lcTagged' keyindex='" + i + "' style='margin-left:5px;'>";
     s += "<p class='title'><a class='title' href='" + items[i].url + "'>" + items[i].name + "</a>";
@@ -145,7 +147,7 @@ function show_history(regex) {
     div.innerHTML = s;
     h_items.appendChild(div);
 
-    let clear = document.createElement('div');
+    var clear = document.createElement('div');
     clear.className = "clearleft";
     h_items.appendChild(clear);
   }
@@ -155,8 +157,8 @@ function show_history(regex) {
  * Filter the displayed history
  */
 function filter() {
-  let h_items = content.querySelectorAll('div.historyItems')[0];
-  let h_regex = document.getElementById('rhRegex');
+  var h_items = content.querySelectorAll('div.historyItems')[0];
+  var h_regex = document.getElementById('rhRegex');
   h_items.innerHTML = "";
   show_history(h_regex.value);
 }
@@ -167,7 +169,7 @@ function filter() {
 function clear() {
   if (confirm("Are you sure you want to permanently delete all history?")) {
     history.clear();
-    let h_items = content.querySelectorAll('div.historyItems')[0];
+    var h_items = content.querySelectorAll('div.historyItems')[0];
     h_items.innerHTML = "";
   }
 }
@@ -176,8 +178,8 @@ function clear() {
  * Modify the maximum number of submissions stored
  */
 function save_limit() {
-  let h_limit = document.getElementById('rhLimit');
-  let re = new RegExp("^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9][0-9][0-9]|[1-9][0-9][0-9][0-9][0-9])$");   // 1...99999
+  var h_limit = document.getElementById('rhLimit');
+  var re = new RegExp("^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9][0-9][0-9]|[1-9][0-9][0-9][0-9][0-9])$");   // 1...99999
   if(re.test(h_limit.value)){
     GM_setValue('limit', parseInt(h_limit.value));
   } else {
@@ -198,11 +200,11 @@ function History(user) {
 
 History.prototype.get_history = function(regex, limit) {
   limit = limit || 100;
-  let submissions = JSON.parse(localStorage[this.key]);
-  let count = 0;
-  let ret = [];
+  var submissions = JSON.parse(localStorage[this.key]);
+  var count = 0;
+  var ret = [];
   while (submissions.length > 0 && count <= limit) {
-    let s = submissions.pop();
+    var s = submissions.pop();
     if (regex == null || regex.test(s.name)) {
       ret.push(s);
       count++;
@@ -212,9 +214,10 @@ History.prototype.get_history = function(regex, limit) {
 };
 
 History.prototype.indexOf = function(s) {
-  let submissions = JSON.parse(localStorage.getItem(this.key));
-  for (let i = 0; i < submissions.length; ++i) {
-    let t = submissions[i];
+  var submissions = JSON.parse(localStorage.getItem(this.key));
+  var t;
+  for (var i = 0; i < submissions.length; ++i) {
+    t = submissions[i];
     if (t.comments == s.comments) {
       return i;
     }
@@ -223,7 +226,7 @@ History.prototype.indexOf = function(s) {
 };
 
 History.prototype.add_submission = function(name, url, comments, sub_name, sub_url, domain_name, domain_url) {
-  let s = {'name': name,
+  var s = {'name': name,
            'url': url,
            'comments': comments,
            'sub_name': sub_name,
@@ -231,9 +234,9 @@ History.prototype.add_submission = function(name, url, comments, sub_name, sub_u
            'domain_name': domain_name,
            'domain_url': domain_url,
            'accessed': new Date().toDateString()};
-  let submissions = JSON.parse(localStorage.getItem(this.key));
+  var submissions = JSON.parse(localStorage.getItem(this.key));
 
-  let index = this.indexOf(s);
+  var index = this.indexOf(s);
   if (index != -1) {
     submissions.splice(index, 1);
   }
@@ -245,10 +248,10 @@ History.prototype.add_submission = function(name, url, comments, sub_name, sub_u
 };
 
 History.prototype.remove_submission = function(name, url) {
-  let submission = {'name': name, 'url': url};
-  let submissions = JSON.parse(localStorage.getItem(this.key));
+  var submission = {'name': name, 'url': url};
+  var submissions = JSON.parse(localStorage.getItem(this.key));
   
-  let index = this.indexOf(s);
+  var index = this.indexOf(s);
   if (index != -1) {
     submissions.splice(index, 1);
     localStorage[this.key] = JSON.stringify(submissions);
