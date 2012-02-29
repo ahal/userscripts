@@ -97,6 +97,7 @@ function add_click_listeners() {
 function add_handlers(s) {
   var link = s.querySelectorAll('a.title')[0];
   var comment = s.querySelectorAll('a.comments')[0];
+  var expbtn = s.querySelectorAll('div.expando-button')[0];
 
   /**
    * Adds the submission to history
@@ -117,6 +118,9 @@ function add_handlers(s) {
   }
   link.addEventListener('click', add_submission);
   comment.addEventListener('click', add_submission);
+  if (expbtn != undefined) {
+      expbtn.addEventListener('click', add_submission);
+  }
 }
 
 /**
