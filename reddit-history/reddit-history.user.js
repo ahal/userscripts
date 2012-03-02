@@ -54,7 +54,8 @@ function append_history_tab() {
     s+="<button id='rhClear'>Clear All History</button>";
     s+="<div style='text-align: right; width: 50%; float: right;'>";
     s+="Limit<input id='rhLimit' value=''/>";
-    s+="<button id='rhSave'>Save</button>";
+    s+="<button id='rhSave'>Save</button></div>";
+    s+="<br><input type='checkbox' id='rhIgnoreCase' checked='" + GM_getValue('ignorecase', true) + "'/>ignore case";
     h_controls.innerHTML = s;
     content.appendChild(h_controls);
 
@@ -66,9 +67,13 @@ function append_history_tab() {
     var h_filter = document.getElementById('rhFilter');
     var h_clear = document.getElementById('rhClear');
     var h_save = document.getElementById('rhSave');
+    var h_case = document.getElementById('rhIgnoreCase');
     h_filter.addEventListener('click', filter);
     h_clear.addEventListener('click', clear);
     h_save.addEventListener('click', save_limit);
+    h_case.addEventListener('click', function() {
+      GM_setValue('ignorecase', h_case.checked);
+    });
 
     var h_limit = document.getElementById('rhLimit');
     h_limit.value = GM_getValue('limit', 10000);
@@ -131,7 +136,11 @@ function show_history(regex) {
   var h_items = content.querySelectorAll('div.historyItems')[0];
   var re = null;
   if (regex != undefined) {
-    re = new RegExp(regex);
+    var modifiers = "";
+    if (GM_getValue('ignorecase', true)) {
+      modifiers = "i";
+    }
+    re = new RegExp(regex, modifiers);
     var filter = document.getElementById('rhRegex');
     filter.value = regex;
   }
@@ -147,14 +156,26 @@ function show_history(regex) {
     s += "<p class='title'><a class='title' href='" + items[i].url + "'>" + items[i].name + "</a>";
     s += "<span class='domain'> (<a href='" + items[i].domain_url + "'>" + items[i].domain_name + "</a>)</span></p>";
     s += "<p class='tagline'>last accessed on " + items[i].accessed + ", in <a href='" + items[i].sub_url + "'>" + items[i].sub_name + "</a></p>";
-    s += "<ul class='flat-list buttons'><li class='first'><a class='comments' href='" + items[i].comments + "'>view comments</a></li></ul></div>";
+    s += "<ul class='flat-list buttons'><li class='first'><a class='comments' href='" + items[i].comments + "'>view comments</a></li>";
+    s += "<li><a class='rhDelete' href='#'>delete</a></li></ul></div>";
     div.innerHTML = s;
     h_items.appendChild(div);
 
     var clear = document.createElement('div');
     clear.className = "clearleft";
     h_items.appendChild(clear);
+  
+    add_delete_listener(items[i], div);
   }
+}
+
+function add_delete_listener(s, div) {
+  var h_delete = div.querySelectorAll('a.rhDelete')[0];
+  h_delete.addEventListener('click', function(){
+    var h_items = content.querySelectorAll('div.historyItems')[0];
+    history.remove_submission(s.comments);
+    h_items.removeChild(div);
+  });
 }
 
 /**
@@ -251,8 +272,8 @@ History.prototype.add_submission = function(name, url, comments, sub_name, sub_u
   localStorage.setItem(this.key, JSON.stringify(submissions));
 };
 
-History.prototype.remove_submission = function(name, url) {
-  var submission = {'name': name, 'url': url};
+History.prototype.remove_submission = function(comments) {
+  var s = {'comments': comments};
   var submissions = JSON.parse(localStorage.getItem(this.key));
   
   var index = this.indexOf(s);
