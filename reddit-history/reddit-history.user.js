@@ -223,8 +223,8 @@ function History(user) {
   }
 }
 
-History.prototype.get_history = function(regex, limit) {
-  limit = limit || 100;
+History.prototype.get_history = function(regex) {
+  limit = GM_getValue('limit', 10000);
   var submissions = JSON.parse(localStorage[this.key]);
   var count = 0;
   var ret = [];
